@@ -1,0 +1,27 @@
+[project]
+name = "metsel"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "XotEmBotZ", email = "xotembotzop@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "cfgrib>=0.9.15.1",
+    "eccodes>=2.47.0",
+    "textual>=8.2.8",
+    "xarray>=2026.7.0",
+]
+
+[project.scripts]
+metsel = "metsel:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "textual-dev>=1.8.0",
+]

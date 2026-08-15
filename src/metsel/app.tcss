@@ -1,0 +1,213 @@
+Screen {
+    layout: vertical;
+    padding: 0;
+    height: 100vh;
+}
+
+#app-box {
+    height: 1fr;
+    layout: vertical;
+    padding: 0;
+}
+
+Footer {
+    height: 1;
+    dock: bottom;
+}
+
+#top-bar {
+    height: 1;
+    padding: 0 1;
+    layout: horizontal;
+    align-vertical: middle;
+    outline: round $accent;
+    margin-bottom: 0;
+}
+
+#file-info-header {
+    width: 1fr;
+    height: 1;
+    content-align: left middle;
+}
+
+#content-container {
+    height: 1fr;
+    layout: horizontal;
+    padding: 0;
+}
+
+#variables-pane {
+    width: 60%;
+    height: 100%;
+    padding: 0 1;
+    layout: vertical;
+    outline: round $accent;
+    margin-right: 0;
+}
+
+#filter-input {
+    margin-top: 0;
+    margin-bottom: 1;
+}
+
+/* Table Header for Variable Selector */
+#table-header {
+    height: 1;
+    color: $text;
+    text-style: bold;
+    padding: 0;
+}
+
+#table-header .col-chk { width: 5; }
+#table-header .col-msg { width: 6; }
+#table-header .col-shortname { width: 10; }
+#table-header .col-name { width: 1fr; }
+#table-header .col-level { width: 10; }
+#table-header .col-leveltype { width: 16; }
+#table-header .col-time { width: 10; }
+
+#var-listview {
+    height: 1fr;
+    padding: 0;
+    background: transparent;
+}
+
+/* ListView Items */
+VariableRow {
+    padding: 0;
+    height: 1;
+    min-height: 1;
+    background: transparent;
+}
+
+/* ListView Items Highlight & Hover */
+VariableRow:hover,
+ListItem.-highlighted,
+ListItem.--highlight,
+ListView > ListItem.-highlighted,
+ListView > ListItem.--highlight,
+ListView:focus > ListItem.-highlighted,
+ListView:focus > ListItem.--highlight {
+    text-style: bold;
+}
+
+VariableRow:hover Label,
+ListItem.-highlighted Label,
+ListItem.--highlight Label,
+ListView > ListItem.-highlighted Label,
+ListView > ListItem.--highlight Label,
+ListView:focus > ListItem.-highlighted Label,
+ListView:focus > ListItem.--highlight Label {
+    background: transparent;
+    text-style: bold;
+}
+
+.row-container {
+    height: 1;
+    align-vertical: middle;
+    padding: 0;
+    background: transparent;
+}
+
+.row-checkbox {
+    width: 5;
+    min-height: 1;
+    height: 1;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.row-checkbox:focus {
+    background: transparent;
+}
+
+.row-checkbox > .toggle--button {
+    background: transparent;
+}
+
+.row-checkbox > .toggle--label {
+    display: none;
+}
+
+.col-msg { width: 6; text-style: bold; color: $accent; }
+.col-shortname { width: 10; color: $success; text-style: bold; }
+.col-name { width: 1fr; }
+.col-level { width: 10; color: $warning; }
+.col-leveltype { width: 16; color: $text-muted; }
+.col-time { width: 10; color: $accent; }
+
+#inspector-pane {
+    width: 40%;
+    height: 100%;
+    padding: 0 1;
+    layout: vertical;
+    outline: round $accent;
+}
+
+.pane-header {
+    text-style: bold;
+    color: $accent;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#code-output-pane {
+    outline: round $success;
+    height: 11;
+    margin-top: 1;
+    margin-bottom: 0;
+    padding: 0 1;
+}
+
+.code-snippet {
+    color: $text-success;
+    padding: 0 1;
+}
+
+.selection-summary {
+    margin-top: 1;
+    margin-bottom: 1;
+    text-style: bold;
+    color: $warning;
+}
+
+/* Modal CSS */
+FileOpenModal {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#dialog {
+    width: 75;
+    height: auto;
+    border: round $accent;
+    background: $panel;
+    padding: 1 2;
+}
+
+#modal-title {
+    text-style: bold;
+    color: $accent;
+    margin-bottom: 1;
+}
+
+#file-input {
+    margin-bottom: 1;
+}
+
+.meta-line {
+    margin-bottom: 0;
+    color: $text-muted;
+}
+
+.button-bar {
+    align-horizontal: right;
+    height: auto;
+    margin-top: 1;
+}
+
+Button {
+    margin-left: 1;
+}
