@@ -209,10 +209,6 @@ class MetSel(App):
                             with VerticalScroll():
                                 yield Static(id="encoding-content")
 
-                    yield Label("⚡ Generated Python Snippet", classes="pane-header")
-                    with Vertical(id="code-output-pane"):
-                        yield Static(id="code-snippet-content", classes="code-snippet")
-
         yield Footer()
 
     def on_mount(self) -> None:
@@ -411,7 +407,6 @@ class MetSel(App):
         )
         lbl = self.query_one("#selection-summary-label", Label)
         lbl.update(f"Selected: {len(self.selected_msg_ids)} messages ({selected_groups_count} groups)")
-        self.update_code_snippet()
 
     def update_inspector(self, grp_id: str) -> None:
         self.active_group_id = grp_id
@@ -479,38 +474,6 @@ class MetSel(App):
         level_opt_list.add_options(options)
         if prev_highlighted is not None and prev_highlighted < len(options):
             level_opt_list.highlighted = prev_highlighted
-
-    def update_code_snippet(self) -> None:
-        code_static = self.query_one("#code-snippet-content", Static)
-
-        if not self.selected_msg_ids:
-            code_static.update(
-                "[dim]# No variables selected.[/dim]\n"
-                "[bold green]import[/bold green] xarray [bold green]as[/bold green] xr\n\n"
-                f'ds = xr.open_dataset("{self.current_file}", engine="cfgrib")'
-            )
-            return
-
-        # Group selected message IDs by shortName and typeOfLevel
-        filter_dict = {}
-        for grp in self.grouped_variables.values():
-            sel_msgs = [m for m in grp["msg_list"] if m["msg_id"] in self.selected_msg_ids]
-            if sel_msgs:
-                s_name = grp["shortName"]
-                l_type = grp["typeOfLevel"]
-                filter_dict[s_name] = l_type
-
-        snippet = (
-            "[dim]# Generated Python code to load selected variable groups[/dim]\n"
-            "[bold green]import[/bold green] xarray [bold green]as[/bold green] xr\n\n"
-            "ds = xr.open_dataset(\n"
-            f'    "{self.current_file}",\n'
-            '    engine="cfgrib",\n'
-            f'    backend_kwargs={{"filter_by_keys": {filter_dict}}}\n'
-            ")\n"
-            "print(ds)"
-        )
-        code_static.update(snippet)
 
 
 def main() -> None:

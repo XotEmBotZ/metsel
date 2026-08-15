@@ -128,18 +128,7 @@ OptionList > .option-list--option-highlighted {
     margin-bottom: 0;
 }
 
-#code-output-pane {
-    outline: round $success;
-    height: 11;
-    margin-top: 1;
-    margin-bottom: 0;
-    padding: 0 1;
-}
 
-.code-snippet {
-    color: $text-success;
-    padding: 0 1;
-}
 
 .button-bar-small {
     height: 3;
@@ -151,11 +140,27 @@ OptionList > .option-list--option-highlighted {
     margin-right: 1;
 }
 
+TabbedContent {
+    height: 1fr;
+}
+
+TabPane {
+    height: 1fr;
+    padding: 0;
+}
+
+#tab-levels-selector {
+    height: 1fr;
+    layout: vertical;
+    overflow-y: hidden;
+}
+
 #level-optionlist {
-    height: auto;
-    max-height: 1fr;
+    height: 1fr;
+    min-height: 5;
     outline: round $accent;
     background: transparent;
+    overflow-y: auto;
 }
 
 .selection-summary {
