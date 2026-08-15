@@ -230,21 +230,93 @@ def fuzzy_search_files(user_input: str) -> list[str]:
     return [m[0] for m in matches if m[1] > 40]
 
 
-def fuzzy_filter_variables(query: str, variables: dict[str, dict]) -> dict[str, dict]:
-    """Fuzzy filter variable messages across all parameters (Grp 1 & Grp 2 metadata)."""
+def compress_ranges(numbers: list[int]) -> str:
+    """Compress a list of integers into a human readable range string like '1-3, 5, 7, 10-1000'."""
+    if not numbers:
+        return ""
+    sorted_nums = sorted(set(numbers))
+    ranges = []
+    start = sorted_nums[0]
+    end = sorted_nums[0]
+
+    for n in sorted_nums[1:]:
+        if n == end + 1:
+            end = n
+        else:
+            ranges.append(f"{start}-{end}" if start != end else f"{start}")
+            start = end = n
+    ranges.append(f"{start}-{end}" if start != end else f"{start}")
+    return ", ".join(ranges)
+
+
+def group_variables(raw_variables: dict[str, dict]) -> dict[str, dict]:
+    """Group GRIB messages by (shortName, typeOfLevel, name, units, step)."""
+    groups_map: dict[tuple, list[dict]] = {}
+
+    for msg_id, v in raw_variables.items():
+        key = (v["shortName"], v["typeOfLevel"], v["name"], v["units"], v["step"])
+        if key not in groups_map:
+            groups_map[key] = []
+        groups_map[key].append(v)
+
+    grouped_variables: dict[str, dict] = {}
+    for idx, (key, msg_list) in enumerate(groups_map.items(), 1):
+        group_id = f"grp_{idx}"
+        short_name, type_of_level, name, units, step = key
+
+        levels = [m["levelVal"] for m in msg_list]
+        compressed_range = compress_ranges(levels)
+        first_msg = msg_list[0]
+
+        unit_str = "hPa" if type_of_level == "isobaricInhPa" else ("m" if type_of_level == "heightAboveGround" else "")
+        level_display = f"[{compressed_range}] {unit_str}".strip() if compressed_range else first_msg["level"]
+
+        grouped_variables[group_id] = {
+            "group_id": group_id,
+            "shortName": short_name,
+            "name": name,
+            "units": units,
+            "typeOfLevel": type_of_level,
+            "step": step,
+            "stepType": first_msg["stepType"],
+            "levelDisplay": level_display,
+            "compressedRange": compressed_range,
+            "msg_list": msg_list,
+            "msg_ids": [m["msg_id"] for m in msg_list],
+            "paramId": first_msg["paramId"],
+            "cfVarName": first_msg["cfVarName"],
+            "refTime": first_msg["refTime"],
+            "gridType": first_msg["gridType"],
+            "gridTemplate": first_msg["gridTemplate"],
+            "points": first_msg["points"],
+            "latRange": first_msg["latRange"],
+            "lonRange": first_msg["lonRange"],
+            "scanningMode": first_msg["scanningMode"],
+            "earthShape": first_msg["earthShape"],
+            "dataPacking": first_msg["dataPacking"],
+            "msgSize": first_msg["msgSize"],
+            "precision": first_msg["precision"],
+            "bitmap": first_msg["bitmap"],
+            "discipline": first_msg["discipline"],
+            "category": first_msg["category"],
+        }
+
+    return grouped_variables
+
+
+def fuzzy_filter_variables(query: str, grouped_variables: dict[str, dict]) -> dict[str, dict]:
+    """Fuzzy filter grouped variables across shortName, description, levelType, etc."""
     if not query.strip():
-        return variables
+        return grouped_variables
 
     query_lower = query.lower()
     filtered = {}
 
-    for msg_id, var in variables.items():
-        # Combine all Grp 1 & 2 details into a single search target string
-        search_blob = f"{msg_id} {var['shortName']} {var['name']} {var['level']} {var['typeOfLevel']} {var['step']} {var['units']} {var['category']}".lower()
+    for group_id, grp in grouped_variables.items():
+        search_blob = f"{grp['group_id']} {grp['shortName']} {grp['name']} {grp['levelDisplay']} {grp['typeOfLevel']} {grp['step']} {grp['units']} {grp['category']}".lower()
 
-        # Score matching using RapidFuzz partial ratio
         score = fuzz.partial_ratio(query_lower, search_blob)
         if score > 60 or query_lower in search_blob:
-            filtered[msg_id] = var
+            filtered[group_id] = grp
 
     return filtered

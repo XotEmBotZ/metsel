@@ -58,13 +58,12 @@ Footer {
     padding: 0;
 }
 
-#table-header .col-chk { width: 5; }
-#table-header .col-msg { width: 6; }
-#table-header .col-shortname { width: 10; }
-#table-header .col-name { width: 1fr; }
-#table-header .col-level { width: 10; }
-#table-header .col-leveltype { width: 16; }
-#table-header .col-time { width: 10; }
+#table-header .col-chk { width: 6; }
+#table-header .col-shortname { width: 13; }
+#table-header .col-name { width: 33; }
+#table-header .col-level { width: 13; }
+#table-header .col-leveltype { width: 17; }
+#table-header .col-time { width: 9; }
 
 #var-optionlist {
     height: 1fr;
@@ -140,6 +139,23 @@ OptionList > .option-list--option-highlighted {
 .code-snippet {
     color: $text-success;
     padding: 0 1;
+}
+
+.button-bar-small {
+    height: 3;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.button-bar-small Button {
+    margin-right: 1;
+}
+
+#level-optionlist {
+    height: auto;
+    max-height: 1fr;
+    outline: round $accent;
+    background: transparent;
 }
 
 .selection-summary {
