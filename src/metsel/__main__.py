@@ -138,9 +138,9 @@ class MetSel(App):
         ("escape", "focus_table", "Focus Table (Esc)"),
         ("q", "quit", "Quit"),
     ]
-    def __init__(self) -> None:
+    def __init__(self, initial_file: str | None = None) -> None:
         super().__init__()
-        self.current_file: str = ""
+        self.current_file: str = initial_file or ""
         self.file_details: dict = {
             "path": "None",
             "size": "0 B",
@@ -212,8 +212,11 @@ class MetSel(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.title = "MetSel - GRIB Inspector & Code Generator"
-        self.action_open_file_modal()
+        self.title = "MetSel - GRIB Inspector"
+        if self.current_file:
+            self.load_grib_file(self.current_file)
+        else:
+            self.action_open_file_modal()
 
     def load_grib_file(self, filepath: str) -> None:
         """Parse real GRIB file and populate TUI elements."""
@@ -476,8 +479,12 @@ class MetSel(App):
             level_opt_list.highlighted = prev_highlighted
 
 
+import sys
+
+
 def main() -> None:
-    app = MetSel()
+    initial_file = sys.argv[1] if len(sys.argv) > 1 else None
+    app = MetSel(initial_file=initial_file)
     app.run()
 
 

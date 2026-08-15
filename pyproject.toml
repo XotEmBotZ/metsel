@@ -1,12 +1,14 @@
 [project]
 name = "metsel"
 version = "0.1.0"
-description = "Add your description here"
+description = "Fast, terminal-native GRIB file inspector and variable selector TUI"
 readme = "README.md"
+license = { text = "MIT" }
+keywords = ["grib", "grib2", "textual", "tui", "weather", "meteo", "xarray", "cfgrib"]
 authors = [
     { name = "XotEmBotZ", email = "xotembotzop@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "cfgrib>=0.9.15.1",
     "eccodes>=2.47.0",
