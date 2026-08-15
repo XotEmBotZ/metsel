@@ -1,54 +1,123 @@
-import os
-import struct
+import subprocess
 from pathlib import Path
+
 from rapidfuzz import fuzz, process
 
-# WMO GRIB2 Code Table 4.2 Parameter Lookups (Discipline 0)
-GRIB2_PARAM_TABLE = {
-    (0, 0): ("tmp", "Temperature", "K"),
-    (0, 1): ("vptmp", "Virtual Potential Temperature", "K"),
-    (0, 2): ("pot", "Potential Temperature", "K"),
-    (0, 3): ("dpt", "Dew Point Temperature", "K"),
-    (1, 0): ("spfh", "Specific Humidity", "kg kg**-1"),
-    (1, 1): ("rh", "Relative Humidity", "%"),
-    (1, 2): ("pwat", "Precipitable Water", "kg m**-2"),
-    (2, 2): ("ugrd", "U-component of Wind", "m s**-1"),
-    (2, 3): ("vgrd", "V-component of Wind", "m s**-1"),
-    (2, 8): ("vort", "Vorticity", "s**-1"),
-    (2, 9): ("dzdt", "Vertical Velocity", "Pa s**-1"),
-    (2, 225): ("cape", "Convective Available Potential Energy", "J kg**-1"),
-    (2, 226): ("cin", "Convective Inhibition", "J kg**-1"),
-    (3, 0): ("pres", "Pressure", "Pa"),
-    (3, 1): ("prmsl", "Pressure Reduced to MSL", "Pa"),
-    (3, 5): ("gh", "Geopotential Height", "gpm"),
-    (3, 6): ("alt", "Altimeter Setting", "Pa"),
-}
+from metsel.wmo_tables import (
+    CENTER_LOOKUP,
+    DISCIPLINE_LOOKUP,
+    GRIB2_LEVEL_TABLE,
+    GRIB2_PARAM_TABLE,
+)
 
-# WMO GRIB2 Code Table 4.5 Surface/Level Type Lookups
-GRIB2_LEVEL_TABLE = {
-    1: ("surface", "Ground or Water Surface"),
-    100: ("isobaricInhPa", "Isobaric Surface"),
-    101: ("meanSea", "Mean Sea Level"),
-    102: ("altitudeAboveMSL", "Specific Altitude Above MSL"),
-    103: ("heightAboveGround", "Specified Height Level Above Ground"),
-    104: ("sigma", "Sigma Level"),
-    105: ("hybrid", "Hybrid Level"),
-    106: ("depthBelowLand", "Depth Below Land Surface"),
-}
-
-CENTER_LOOKUP = {
-    7: "US National Weather Service - NCEP",
-    98: "ECMWF",
-    34: "Japanese Meteorological Agency",
-    54: "Canadian Meteorological Center",
-}
+# Attempt eccodes import for dynamic backend lookup if available
+HAS_ECCODES = False
+try:
+    import eccodes  # type: ignore[import-untyped]
+    HAS_ECCODES = True
+except Exception:  # noqa: BLE001
+    eccodes = None
+    HAS_ECCODES = False
 
 
 class GribParser:
-    """Fast pure-Python GRIB2 reader & metadata extractor."""
+    """Fast pure-Python GRIB2 reader & metadata extractor with dynamic eccodes fallback."""
+
+    @staticmethod
+    def _inspect_eccodes(filepath: str) -> dict | None:
+        """Inspect file using eccodes dynamic tables if available."""
+        if not HAS_ECCODES or eccodes is None:
+            return None
+
+        try:
+            path = Path(filepath)
+            size_bytes = path.stat().st_size
+            size_mb = size_bytes / (1024 * 1024)
+
+            messages = []
+            file_meta = {
+                "path": str(path),
+                "size": f"{size_mb:.1f} MB ({size_bytes:,} bytes)",
+                "total_msgs": 0,
+                "edition": "GRIB2",
+                "center": "Unknown",
+                "ref_time": "N/A",
+                "tables_version": "N/A",
+            }
+
+            with open(path, "rb") as f:
+                msg_count = 0
+                while True:
+                    gid = eccodes.codes_grib_new_from_file(f)
+                    if gid is None:
+                        break
+                    msg_count += 1
+
+                    try:
+                        short_name = eccodes.codes_get_string(gid, "shortName")
+                        name = eccodes.codes_get_string(gid, "name")
+                        units = eccodes.codes_get_string(gid, "units")
+                        param_id = eccodes.codes_get_long(gid, "paramId")
+                        type_of_level = eccodes.codes_get_string(gid, "typeOfLevel")
+                        level = eccodes.codes_get_long(gid, "level")
+                        discipline = eccodes.codes_get_string(gid, "discipline")
+                        center = eccodes.codes_get_string(gid, "centre")
+                        date_str = str(eccodes.codes_get_long(gid, "date"))
+                        time_val = eccodes.codes_get_long(gid, "time")
+                        grid_type = eccodes.codes_get_string(gid, "gridType")
+                        num_points = eccodes.codes_get_long(gid, "numberOfDataPoints")
+
+                        if msg_count == 1:
+                            file_meta["center"] = center
+                            file_meta["ref_time"] = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]} {time_val:04d} UTC"
+
+                        level_str = f"{level}"
+                        msg_data = {
+                            "msg_id": str(msg_count),
+                            "shortName": short_name,
+                            "name": name,
+                            "units": units,
+                            "paramId": param_id,
+                            "cfVarName": short_name,
+                            "level": level_str,
+                            "typeOfLevel": type_of_level,
+                            "levelVal": level,
+                            "step": "0h (Instant)",
+                            "stepType": "instant",
+                            "refTime": file_meta["ref_time"],
+                            "gridType": grid_type,
+                            "gridTemplate": "Dynamic Template",
+                            "points": f"{num_points:,}",
+                            "latRange": "N/A",
+                            "lonRange": "N/A",
+                            "scanningMode": "Dynamic",
+                            "earthShape": "Earth Sphere",
+                            "dataPacking": "ECMWF Dynamic",
+                            "msgSize": "N/A",
+                            "precision": "Float",
+                            "bitmap": "None",
+                            "discipline": discipline,
+                            "category": name,
+                        }
+                        messages.append(msg_data)
+                    finally:
+                        eccodes.codes_release(gid)
+
+            if msg_count > 0:
+                file_meta["total_msgs"] = msg_count
+                return {"file_meta": file_meta, "variables": {m["msg_id"]: m for m in messages}}
+        except Exception:  # noqa: BLE001
+            return None
+
+        return None
 
     @staticmethod
     def inspect_file(filepath: str) -> dict:
+        # Try dynamic eccodes extraction first if supported
+        eccodes_res = GribParser._inspect_eccodes(filepath)
+        if eccodes_res is not None:
+            return eccodes_res
+
         path = Path(filepath)
         if not path.is_file():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -78,6 +147,8 @@ class GribParser:
                 rest = f.read(total_len - 16)
                 msg_count += 1
 
+                discipline_code = header[6]
+                discipline_name = DISCIPLINE_LOOKUP.get(discipline_code, f"Discipline {discipline_code}")
                 edition = header[7]
                 file_meta["edition"] = f"GRIB Edition {edition}"
 
@@ -87,6 +158,7 @@ class GribParser:
                 scan_mode = "+i -j"
                 grid_type = "regular_ll"
                 points = 0
+                points_str = "0"
                 lat_range = "N/A"
                 lon_range = "N/A"
 
@@ -128,7 +200,6 @@ class GribParser:
 
                     # Section 4: Product Definition
                     elif sec_num == 4 and len(s_data) >= 30:
-                        discipline = s_data[9] if len(s_data) > 9 else 0
                         cat = s_data[9]
                         num = s_data[10]
                         level_type = s_data[22]
@@ -137,12 +208,12 @@ class GribParser:
 
                     idx += sec_len
 
-                # Lookup Parameter metadata
+                # Lookup Parameter metadata from wmo_tables
                 param_tuple = GRIB2_PARAM_TABLE.get((cat, num), (f"var_{cat}_{num}", f"Parameter ({cat}, {num})", "unknown"))
                 short_name, full_name, units = param_tuple
 
                 level_info = GRIB2_LEVEL_TABLE.get(level_type, (f"level_{level_type}", f"Level Type {level_type}"))
-                type_of_level, level_desc = level_info
+                type_of_level, _level_desc = level_info
 
                 level_str = f"{level_val} hPa" if level_type == 100 else (f"{level_val} m" if level_type == 103 else f"{level_val}")
 
@@ -161,7 +232,7 @@ class GribParser:
                     "refTime": file_meta["ref_time"],
                     "gridType": grid_type,
                     "gridTemplate": "Template 3.0",
-                    "points": points_str if 'points_str' in locals() else f"{points:,}",
+                    "points": points_str,
                     "latRange": lat_range,
                     "lonRange": lon_range,
                     "scanningMode": scan_mode,
@@ -170,7 +241,7 @@ class GribParser:
                     "msgSize": f"{total_len:,} bytes",
                     "precision": "16-bit float",
                     "bitmap": "None (Full Grid)",
-                    "discipline": f"{header[6]} (Meteorological)",
+                    "discipline": f"{discipline_code} ({discipline_name})",
                     "category": f"{cat} ({full_name})",
                 }
                 messages.append(msg_data)
@@ -185,11 +256,8 @@ def fuzzy_search_files(user_input: str) -> list[str]:
     if not user_input:
         return []
 
-    import subprocess
-
     input_path = Path(user_input).expanduser()
 
-    # Determine base directory to search
     if input_path.is_dir():
         base_dir = input_path
         filename_query = ""
@@ -200,7 +268,6 @@ def fuzzy_search_files(user_input: str) -> list[str]:
         base_dir = Path(".")
         filename_query = user_input
 
-    # Fast system find command (max 2 levels deep, ignoring hidden files)
     candidate_files = []
     try:
         cmd = [
@@ -214,10 +281,10 @@ def fuzzy_search_files(user_input: str) -> list[str]:
             "-path",
             "*/.*",
         ]
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=1.0)
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=1.0, check=False)
         if res.returncode == 0:
             candidate_files = [line for line in res.stdout.splitlines() if line]
-    except Exception:
+    except Exception:  # noqa: BLE001, S110
         pass
 
     if not candidate_files:
@@ -253,7 +320,7 @@ def group_variables(raw_variables: dict[str, dict]) -> dict[str, dict]:
     """Group GRIB messages by (shortName, typeOfLevel, name, units, step)."""
     groups_map: dict[tuple, list[dict]] = {}
 
-    for msg_id, v in raw_variables.items():
+    for v in raw_variables.values():
         key = (v["shortName"], v["typeOfLevel"], v["name"], v["units"], v["step"])
         if key not in groups_map:
             groups_map[key] = []

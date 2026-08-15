@@ -1,9 +1,12 @@
 from pathlib import Path
+
+from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
+    Checkbox,
     Footer,
     Header,
     Input,
@@ -17,9 +20,12 @@ from textual.widgets import (
 )
 from textual.widgets.option_list import Option
 
-from rich.text import Text
-
-from metsel.grib_parser import GribParser, fuzzy_filter_variables, fuzzy_search_files, group_variables
+from metsel.grib_parser import (
+    GribParser,
+    fuzzy_filter_variables,
+    fuzzy_search_files,
+    group_variables,
+)
 
 
 class FileOpenModal(ModalScreen[str]):
@@ -131,7 +137,7 @@ class VariableRow(ListItem):
 class MetSel(App):
     CSS_PATH = "app.tcss"
 
-    BINDINGS = [
+    BINDINGS = [  # noqa: RUF012
         ("o", "open_file_modal", "Open File (O)"),
         ("f", "focus_filter", "Filter (F)"),
         ("space", "toggle_current_row", "Toggle (Space)"),
@@ -326,7 +332,8 @@ class MetSel(App):
 
         elif var_opt_list.highlighted is not None:
             option = var_opt_list.get_option_at_index(var_opt_list.highlighted)
-            self.toggle_variable_selection(option.id, var_opt_list.highlighted)
+            if option.id:
+                self.toggle_variable_selection(option.id, var_opt_list.highlighted)
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option_list.id == "var-optionlist" and event.option.id:
