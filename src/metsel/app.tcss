@@ -66,40 +66,16 @@ Footer {
 #table-header .col-leveltype { width: 16; }
 #table-header .col-time { width: 10; }
 
-#var-listview {
+#var-optionlist {
     height: 1fr;
     padding: 0;
     background: transparent;
+    border: none;
 }
 
-/* ListView Items */
-VariableRow {
-    padding: 0;
-    height: 1;
-    min-height: 1;
-    background: transparent;
-}
-
-/* ListView Items Highlight & Hover */
-VariableRow:hover,
-ListItem.-highlighted,
-ListItem.--highlight,
-ListView > ListItem.-highlighted,
-ListView > ListItem.--highlight,
-ListView:focus > ListItem.-highlighted,
-ListView:focus > ListItem.--highlight {
+OptionList > .option-list--option-highlighted {
     text-style: bold;
-}
-
-VariableRow:hover Label,
-ListItem.-highlighted Label,
-ListItem.--highlight Label,
-ListView > ListItem.-highlighted Label,
-ListView > ListItem.--highlight Label,
-ListView:focus > ListItem.-highlighted Label,
-ListView:focus > ListItem.--highlight Label {
     background: transparent;
-    text-style: bold;
 }
 
 .row-container {
@@ -200,6 +176,12 @@ FileOpenModal {
 .meta-line {
     margin-bottom: 0;
     color: $text-muted;
+}
+
+#file-results-list {
+    height: 6;
+    margin-bottom: 1;
+    border: solid $primary;
 }
 
 .button-bar {
