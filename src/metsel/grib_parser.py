@@ -14,6 +14,7 @@ from metsel.wmo_tables import (
 HAS_ECCODES = False
 try:
     import eccodes  # type: ignore[import-untyped]
+
     HAS_ECCODES = True
 except Exception:  # noqa: BLE001
     eccodes = None
@@ -69,7 +70,9 @@ class GribParser:
 
                         if msg_count == 1:
                             file_meta["center"] = center
-                            file_meta["ref_time"] = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]} {time_val:04d} UTC"
+                            file_meta["ref_time"] = (
+                                f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]} {time_val:04d} UTC"
+                            )
 
                         level_str = f"{level}"
                         msg_data = {
@@ -105,7 +108,10 @@ class GribParser:
 
             if msg_count > 0:
                 file_meta["total_msgs"] = msg_count
-                return {"file_meta": file_meta, "variables": {m["msg_id"]: m for m in messages}}
+                return {
+                    "file_meta": file_meta,
+                    "variables": {m["msg_id"]: m for m in messages},
+                }
         except Exception:  # noqa: BLE001
             return None
 
@@ -148,7 +154,9 @@ class GribParser:
                 msg_count += 1
 
                 discipline_code = header[6]
-                discipline_name = DISCIPLINE_LOOKUP.get(discipline_code, f"Discipline {discipline_code}")
+                discipline_name = DISCIPLINE_LOOKUP.get(
+                    discipline_code, f"Discipline {discipline_code}"
+                )
                 edition = header[7]
                 file_meta["edition"] = f"GRIB Edition {edition}"
 
@@ -176,11 +184,21 @@ class GribParser:
                     # Section 1: Identification
                     if sec_num == 1 and len(s_data) >= 21:
                         center_id = int.from_bytes(s_data[5:7], "big")
-                        file_meta["center"] = CENTER_LOOKUP.get(center_id, f"Center ID {center_id}")
+                        file_meta["center"] = CENTER_LOOKUP.get(
+                            center_id, f"Center ID {center_id}"
+                        )
                         file_meta["tables_version"] = f"Version {s_data[9]}"
                         yr = int.from_bytes(s_data[12:14], "big")
-                        mo, dy, hr, mn, sc = s_data[14], s_data[15], s_data[16], s_data[17], s_data[18]
-                        file_meta["ref_time"] = f"{yr:04d}-{mo:02d}-{dy:02d} {hr:02d}:{mn:02d}:{sc:02d} UTC"
+                        mo, dy, hr, mn, sc = (
+                            s_data[14],
+                            s_data[15],
+                            s_data[16],
+                            s_data[17],
+                            s_data[18],
+                        )
+                        file_meta["ref_time"] = (
+                            f"{yr:04d}-{mo:02d}-{dy:02d} {hr:02d}:{mn:02d}:{sc:02d} UTC"
+                        )
 
                     # Section 3: Grid Definition
                     elif sec_num == 3 and len(s_data) >= 14:
@@ -189,10 +207,18 @@ class GribParser:
                             ni = int.from_bytes(s_data[30:34], "big")
                             nj = int.from_bytes(s_data[34:38], "big")
                             points_str = f"{points:,} ({ni} x {nj})"
-                            lat1 = int.from_bytes(s_data[46:50], "big", signed=True) / 1e6
-                            lon1 = int.from_bytes(s_data[50:54], "big", signed=True) / 1e6
-                            lat2 = int.from_bytes(s_data[55:59], "big", signed=True) / 1e6
-                            lon2 = int.from_bytes(s_data[59:63], "big", signed=True) / 1e6
+                            lat1 = (
+                                int.from_bytes(s_data[46:50], "big", signed=True) / 1e6
+                            )
+                            lon1 = (
+                                int.from_bytes(s_data[50:54], "big", signed=True) / 1e6
+                            )
+                            lat2 = (
+                                int.from_bytes(s_data[55:59], "big", signed=True) / 1e6
+                            )
+                            lon2 = (
+                                int.from_bytes(s_data[59:63], "big", signed=True) / 1e6
+                            )
                             lat_range = f"{lat1:.2f}°N to {lat2:.2f}°S"
                             lon_range = f"{lon1:.2f}°E to {lon2:.2f}°E"
                         else:
@@ -204,18 +230,29 @@ class GribParser:
                         num = s_data[10]
                         level_type = s_data[22]
                         raw_level_val = int.from_bytes(s_data[24:28], "big")
-                        level_val = raw_level_val // 100 if level_type == 100 else raw_level_val
+                        level_val = (
+                            raw_level_val // 100 if level_type == 100 else raw_level_val
+                        )
 
                     idx += sec_len
 
                 # Lookup Parameter metadata from wmo_tables
-                param_tuple = GRIB2_PARAM_TABLE.get((cat, num), (f"var_{cat}_{num}", f"Parameter ({cat}, {num})", "unknown"))
+                param_tuple = GRIB2_PARAM_TABLE.get(
+                    (cat, num),
+                    (f"var_{cat}_{num}", f"Parameter ({cat}, {num})", "unknown"),
+                )
                 short_name, full_name, units = param_tuple
 
-                level_info = GRIB2_LEVEL_TABLE.get(level_type, (f"level_{level_type}", f"Level Type {level_type}"))
+                level_info = GRIB2_LEVEL_TABLE.get(
+                    level_type, (f"level_{level_type}", f"Level Type {level_type}")
+                )
                 type_of_level, _level_desc = level_info
 
-                level_str = f"{level_val} hPa" if level_type == 100 else (f"{level_val} m" if level_type == 103 else f"{level_val}")
+                level_str = (
+                    f"{level_val} hPa"
+                    if level_type == 100
+                    else (f"{level_val} m" if level_type == 103 else f"{level_val}")
+                )
 
                 msg_data = {
                     "msg_id": str(msg_count),
@@ -247,7 +284,10 @@ class GribParser:
                 messages.append(msg_data)
 
             file_meta["total_msgs"] = msg_count
-            return {"file_meta": file_meta, "variables": {m["msg_id"]: m for m in messages}}
+            return {
+                "file_meta": file_meta,
+                "variables": {m["msg_id"]: m for m in messages},
+            }
 
 
 def fuzzy_search_files(user_input: str) -> list[str]:
@@ -281,7 +321,9 @@ def fuzzy_search_files(user_input: str) -> list[str]:
             "-path",
             "*/.*",
         ]
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=1.0, check=False)
+        res = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=1.0, check=False
+        )
         if res.returncode == 0:
             candidate_files = [line for line in res.stdout.splitlines() if line]
     except Exception:  # noqa: BLE001, S110
@@ -293,7 +335,9 @@ def fuzzy_search_files(user_input: str) -> list[str]:
     if not filename_query:
         return candidate_files[:10]
 
-    matches = process.extract(filename_query, candidate_files, scorer=fuzz.partial_ratio, limit=10)
+    matches = process.extract(
+        filename_query, candidate_files, scorer=fuzz.partial_ratio, limit=10
+    )
     return [m[0] for m in matches if m[1] > 40]
 
 
@@ -335,8 +379,16 @@ def group_variables(raw_variables: dict[str, dict]) -> dict[str, dict]:
         compressed_range = compress_ranges(levels)
         first_msg = msg_list[0]
 
-        unit_str = "hPa" if type_of_level == "isobaricInhPa" else ("m" if type_of_level == "heightAboveGround" else "")
-        level_display = f"[{compressed_range}] {unit_str}".strip() if compressed_range else first_msg["level"]
+        unit_str = (
+            "hPa"
+            if type_of_level == "isobaricInhPa"
+            else ("m" if type_of_level == "heightAboveGround" else "")
+        )
+        level_display = (
+            f"[{compressed_range}] {unit_str}".strip()
+            if compressed_range
+            else first_msg["level"]
+        )
 
         grouped_variables[group_id] = {
             "group_id": group_id,
@@ -371,7 +423,9 @@ def group_variables(raw_variables: dict[str, dict]) -> dict[str, dict]:
     return grouped_variables
 
 
-def fuzzy_filter_variables(query: str, grouped_variables: dict[str, dict]) -> dict[str, dict]:
+def fuzzy_filter_variables(
+    query: str, grouped_variables: dict[str, dict]
+) -> dict[str, dict]:
     """Fuzzy filter grouped variables across shortName, description, levelType, etc."""
     if not query.strip():
         return grouped_variables

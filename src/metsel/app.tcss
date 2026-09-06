@@ -58,12 +58,29 @@ Footer {
     padding: 0;
 }
 
-#table-header .col-chk { width: 6; }
-#table-header .col-shortname { width: 13; }
-#table-header .col-name { width: 33; }
-#table-header .col-level { width: 13; }
-#table-header .col-leveltype { width: 17; }
-#table-header .col-time { width: 9; }
+#table-header .col-chk {
+    width: 6;
+}
+
+#table-header .col-shortname {
+    width: 13;
+}
+
+#table-header .col-name {
+    width: 33;
+}
+
+#table-header .col-level {
+    width: 13;
+}
+
+#table-header .col-leveltype {
+    width: 17;
+}
+
+#table-header .col-time {
+    width: 9;
+}
 
 #var-optionlist {
     height: 1fr;
@@ -72,7 +89,7 @@ Footer {
     border: none;
 }
 
-OptionList > .option-list--option-highlighted {
+OptionList>.option-list--option-highlighted {
     text-style: bold;
     background: transparent;
 }
@@ -98,20 +115,44 @@ OptionList > .option-list--option-highlighted {
     background: transparent;
 }
 
-.row-checkbox > .toggle--button {
+.row-checkbox>.toggle--button {
     background: transparent;
 }
 
-.row-checkbox > .toggle--label {
+.row-checkbox>.toggle--label {
     display: none;
 }
 
-.col-msg { width: 6; text-style: bold; color: $accent; }
-.col-shortname { width: 10; color: $success; text-style: bold; }
-.col-name { width: 1fr; }
-.col-level { width: 10; color: $warning; }
-.col-leveltype { width: 16; color: $text-muted; }
-.col-time { width: 10; color: $accent; }
+.col-msg {
+    width: 6;
+    text-style: bold;
+    color: $accent;
+}
+
+.col-shortname {
+    width: 10;
+    color: $success;
+    text-style: bold;
+}
+
+.col-name {
+    width: 1fr;
+}
+
+.col-level {
+    width: 10;
+    color: $warning;
+}
+
+.col-leveltype {
+    width: 16;
+    color: $text-muted;
+}
+
+.col-time {
+    width: 10;
+    color: $accent;
+}
 
 #inspector-pane {
     width: 40%;
@@ -128,8 +169,6 @@ OptionList > .option-list--option-highlighted {
     margin-bottom: 0;
 }
 
-
-
 .button-bar-small {
     height: 3;
     margin-top: 0;
@@ -138,6 +177,12 @@ OptionList > .option-list--option-highlighted {
 
 .button-bar-small Button {
     margin-right: 1;
+    border: tall transparent;
+    padding: 0 2;
+}
+
+.button-bar-small Button:hover {
+    border: tall $accent;
 }
 
 TabbedContent {
@@ -147,6 +192,27 @@ TabbedContent {
 TabPane {
     height: 1fr;
     padding: 0;
+}
+
+.tab-details-container {
+    height: 1fr;
+    layout: vertical;
+}
+
+.tab-action-bar {
+    height: 3;
+    margin-top: 1;
+    align-horizontal: center;
+}
+
+.tab-action-bar Button {
+    width: 100%;
+    border: tall transparent;
+    padding: 0 2;
+}
+
+.tab-action-bar Button:hover {
+    border: tall $accent;
 }
 
 #tab-levels-selector {
@@ -168,49 +234,4 @@ TabPane {
     margin-bottom: 1;
     text-style: bold;
     color: $warning;
-}
-
-/* Modal CSS */
-FileOpenModal {
-    align: center middle;
-    background: rgba(0, 0, 0, 0.75);
-}
-
-#dialog {
-    width: 75;
-    height: auto;
-    border: round $accent;
-    background: $panel;
-    padding: 1 2;
-}
-
-#modal-title {
-    text-style: bold;
-    color: $accent;
-    margin-bottom: 1;
-}
-
-#file-input {
-    margin-bottom: 1;
-}
-
-.meta-line {
-    margin-bottom: 0;
-    color: $text-muted;
-}
-
-#file-results-list {
-    height: 6;
-    margin-bottom: 1;
-    border: solid $primary;
-}
-
-.button-bar {
-    align-horizontal: right;
-    height: auto;
-    margin-top: 1;
-}
-
-Button {
-    margin-left: 1;
 }

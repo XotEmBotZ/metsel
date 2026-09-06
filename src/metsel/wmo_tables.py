@@ -15,7 +15,6 @@ GRIB2_PARAM_TABLE = {
     (0, 8): ("dalr", "Dry Adiabatic Lapse Rate", "K m**-1"),
     (0, 10): ("latp", "Latent Heat Net Flux", "W m**-2"),
     (0, 11): ("senp", "Sensible Heat Net Flux", "W m**-2"),
-
     # Category 1: Moisture
     (1, 0): ("spfh", "Specific Humidity", "kg kg**-1"),
     (1, 1): ("rh", "Relative Humidity", "%"),
@@ -28,7 +27,6 @@ GRIB2_PARAM_TABLE = {
     (1, 11): ("snow", "Snow Depth", "m"),
     (1, 13): ("weasd", "Water Equivalent of Accumulated Snow Depth", "kg m**-2"),
     (1, 19): ("cwat", "Cloud Water", "kg m**-2"),
-
     # Category 2: Momentum
     (2, 0): ("wind", "Wind Speed", "m s**-1"),
     (2, 1): ("wdir", "Wind Direction", "deg"),
@@ -41,7 +39,6 @@ GRIB2_PARAM_TABLE = {
     (2, 14): ("gust", "Wind Gust", "m s**-1"),
     (2, 225): ("cape", "Convective Available Potential Energy", "J kg**-1"),
     (2, 226): ("cin", "Convective Inhibition", "J kg**-1"),
-
     # Category 3: Mass
     (3, 0): ("pres", "Pressure", "Pa"),
     (3, 1): ("prmsl", "Pressure Reduced to MSL", "Pa"),
@@ -51,26 +48,22 @@ GRIB2_PARAM_TABLE = {
     (3, 5): ("gh", "Geopotential Height", "gpm"),
     (3, 6): ("alt", "Altimeter Setting", "Pa"),
     (3, 9): ("hgt", "Geometric Height", "m"),
-
     # Category 4: Short-wave Radiation
     (4, 0): ("nswrs", "Net Short-Wave Radiation Flux (Surface)", "W m**-2"),
     (4, 1): ("nswrt", "Net Short-Wave Radiation Flux (Top of Atmosphere)", "W m**-2"),
     (4, 2): ("dswrf", "Downward Short-Wave Radiation Flux", "W m**-2"),
     (4, 3): ("uswrf", "Upward Short-Wave Radiation Flux", "W m**-2"),
-
     # Category 5: Long-wave Radiation
     (5, 0): ("nlwrs", "Net Long-Wave Radiation Flux (Surface)", "W m**-2"),
     (5, 1): ("nlwrt", "Net Long-Wave Radiation Flux (Top of Atmosphere)", "W m**-2"),
     (5, 2): ("dlwrf", "Downward Long-Wave Radiation Flux", "W m**-2"),
     (5, 3): ("ulwrf", "Upward Long-Wave Radiation Flux", "W m**-2"),
-
     # Category 6: Cloud
     (6, 0): ("cice", "Cloud Ice", "kg m**-2"),
     (6, 1): ("tcc", "Total Cloud Cover", "%"),
     (6, 2): ("lcc", "Low Cloud Cover", "%"),
     (6, 3): ("mcc", "Medium Cloud Cover", "%"),
     (6, 4): ("hcc", "High Cloud Cover", "%"),
-
     # Category 19: Physical Atmospheric Properties
     (19, 0): ("vis", "Visibility", "m"),
     (19, 1): ("albedo", "Albedo", "%"),

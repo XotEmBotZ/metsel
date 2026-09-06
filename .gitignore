@@ -9,5 +9,7 @@ wheels/
 # Virtual environments
 .venv
 
-# Test files
+# Test files & temporary downloads
 test/
+Downloads/
+*.idx
