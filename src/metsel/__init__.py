@@ -1,14 +1,8 @@
-from .__main__ import MetSel
+from metsel.app import MetSel, main
 
 app = MetSel
 
-
-def main() -> None:
-    app_instance = MetSel()
-    app_instance.run()
-
+__all__ = ["MetSel", "app", "main"]
 
 if __name__ == "__main__":
     main()
-
-

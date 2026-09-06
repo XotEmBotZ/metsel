@@ -1,0 +1,83 @@
+CodePreviewModal {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+#code-dialog {
+    width: 90%;
+    height: 90%;
+    border: round $accent;
+    background: $panel;
+    padding: 1 2;
+    layout: vertical;
+}
+
+#code-dialog-header {
+    height: 2;
+    layout: horizontal;
+    align-vertical: middle;
+    margin-bottom: 1;
+}
+
+#code-modal-title {
+    width: 1fr;
+    text-style: bold;
+    color: $success;
+}
+
+#code-modal-hint {
+    color: $text-muted;
+}
+
+#code-preview-scroll {
+    height: 1fr;
+    border: solid $accent;
+    background: #1e1e1e;
+    padding: 1;
+    overflow-y: auto;
+}
+
+#code-syntax-view {
+    width: 100%;
+}
+
+#export-controls-box {
+    height: auto;
+    margin-top: 1;
+    layout: vertical;
+}
+
+.export-file-row {
+    height: 3;
+    layout: horizontal;
+    align-vertical: middle;
+}
+
+.lbl-save-as {
+    width: auto;
+    margin-right: 1;
+    text-style: bold;
+    color: $text;
+}
+
+#input-save-filename {
+    width: 30;
+    margin-right: 2;
+}
+
+.export-file-row Button {
+    margin-left: 1;
+    border: tall transparent;
+    padding: 0 2;
+}
+
+.export-file-row Button:hover {
+    border: tall $accent;
+}
+
+.status-label {
+    height: 1;
+    color: $success;
+    text-style: bold;
+    margin-top: 0;
+}

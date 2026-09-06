@@ -1,0 +1,49 @@
+FileOpenModal {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#dialog {
+    width: 75;
+    height: auto;
+    border: round $accent;
+    background: $panel;
+    padding: 1 2;
+}
+
+#modal-title {
+    text-style: bold;
+    color: $accent;
+    margin-bottom: 1;
+}
+
+#file-input {
+    margin-bottom: 1;
+}
+
+.meta-line {
+    margin-bottom: 0;
+    color: $text-muted;
+}
+
+#file-results-list {
+    height: 6;
+    margin-bottom: 1;
+    border: solid $primary;
+}
+
+.button-bar {
+    align-horizontal: right;
+    height: auto;
+    margin-top: 1;
+}
+
+.button-bar Button {
+    margin-left: 2;
+    border: tall transparent;
+    padding: 0 2;
+}
+
+.button-bar Button:hover {
+    border: tall $accent;
+}
